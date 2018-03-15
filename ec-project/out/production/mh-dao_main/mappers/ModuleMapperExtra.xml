@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="org.ec.mh.dao.mapper.ModuleMapperExtra" >
+	<select id="select" resultType="java.util.HashMap">  
+		SELECT DISTINCT 
+			id, module_code, owner_type, has_child, level0, module_name, is_menu, is_menu_page, 
+    		parent_code, show_order, url, child_show_type
+		FROM Module 
+		order by show_order asc LIMIT 0,10
+    </select> 
+    
+    <select id="search" resultType="java.util.HashMap" parameterType="java.lang.String">
+    	SELECT *
+    	FROM module
+    	WHERE id = #{moduleId,jdbcType=VARCHAR}
+    </select>
+    
+    <delete id="deleteByParent" parameterType="java.lang.String">
+    	DELETE FROM module 
+    	WHERE
+    	<foreach collection="codes" item = "moduleCode"  separator=" OR " >
+    		<![CDATA[ module_code LIKE concat(#{moduleCode,jdbcType=VARCHAR},'%')]]>  
+    	</foreach> 
+    </delete>
+    
+    <select id="findModule" resultType="java.util.HashMap" parameterType="java.lang.String">
+		SELECT IFNULL(MAX(show_order),0) as showOrder
+		FROM module
+		WHERE
+		<if test="parent == null">
+			parent_code IS NULL 
+		</if>
+		<if test="parent != null">
+			parent_code = #{parent,jdbcType=VARCHAR}
+		</if> 			
+    </select>
+    
+    <select id="findBigger" resultType="java.util.HashMap">
+    	SELECT show_order,id
+    	FROM module
+    	WHERE show_order &lt; #{showOrder,jdbcType=INTEGER} AND 
+    	<if test="parentCode == null">
+    		parent_code IS NULL
+    	</if>
+    	<if test="parentCode != null">
+    		parent_code = #{parentCode,jdbcType=VARCHAR}
+    	</if>
+    
+    	ORDER BY show_order DESC LIMIT 1
+    </select>
+    
+    <select id="findSmaller" resultType="java.util.HashMap">
+    	SELECT show_order,id
+    	FROM module
+    	WHERE show_order &gt; #{showOrder,jdbcType=INTEGER} AND
+    	<if test="parentCode == null">
+    		parent_code IS NULL
+    	</if>
+    	<if test="parentCode != null">
+    		parent_code = #{parentCode,jdbcType=VARCHAR}
+    	</if>
+    	
+    	ORDER BY show_order ASC LIMIT 1
+    </select>
+    
+    <select id="goNextPage" resultType="java.util.HashMap">
+    	SELECT DISTINCT
+    		id, module_code moduleCode, owner_type ownerType, has_child hasChild, level0, module_name moduleName, is_menu isMenu, is_menu_page ismenuPage, 
+    		parent_code parentCode, show_order showOrder, url, child_show_type childShowType
+    	FROM module
+    	WHERE 
+		<if test="parentCode == null">
+			parent_code IS NULL 
+		</if>
+		<if test="parentCode != null">
+			parent_code = #{parentCode,jdbcType=VARCHAR}
+		</if> 	 
+    	<if test="start>= 0">
+    		limit #{start, jdbcType=INTEGER},#{end, jdbcType=INTEGER}
+    	</if>
+    </select>
+    
+    <select id="findMaxCodeByParentCode" resultType="java.util.HashMap"> 
+		SELECT
+			MAX(module_code) AS maxCode
+		FROM
+			(
+			   SELECT
+					module_code,
+          			parent_code
+				FROM
+					module
+				UNION ALL
+					SELECT
+						module_code,
+            			parent_code
+					FROM
+						app_module
+			 ) as modules
+		WHERE
+		<if test="parentCode == null">
+			parent_code IS NULL
+		</if>
+		<if test="parentCode != null">
+			parent_code = #{parentCode, jdbcType=VARCHAR}
+		</if>
+	</select>
+	
+	<update id="updateHasChild">
+		UPDATE module SET has_child=#{hasChild,jdbcType=TINYINT} WHERE module_code=#{parentCode,jdbcType=VARCHAR}
+	</update>
+	
+	<select id="findModulesWithLimit" resultType="java.util.HashMap">
+		SELECT id, module_code moduleCode, owner_type ownerType, has_child hasChild, level0, module_name moduleName, is_menu isMenu, is_menu_page ismenuPage, 
+    		parent_code parentCode, show_order showOrder, url, child_show_type childShowType
+		 FROM module
+		where 1=1 
+		<if test="parentCode == null">
+			and parent_code IS NULL 
+		</if>
+		<if test="parentCode != null">
+			and parent_code = #{parentCode,jdbcType=VARCHAR}
+		</if> 
+    	<if test="moduleName != null and moduleName !=''">
+    		<trim suffixOverrides="and">
+	    		<if test="moduleName != null ">
+	    			AND module_name like CONCAT('%',#{moduleName},'%') 
+	    		</if>
+    		</trim>
+    	</if>
+    	order by show_order asc
+    	<if test="start>= 0">
+    		limit #{start, jdbcType=INTEGER},#{end, jdbcType=INTEGER}
+    	</if>
+	</select>
+	
+	<select id="searchModuleCount" resultType="java.util.HashMap">
+		SELECT id,module_code AS moduleCode,module_name AS moduleName,url,owner_type AS ownerType,level0,show_order AS showOrder FROM module
+    	<if test="moduleName != null and moduleName !=''">
+    		<trim suffixOverrides="and">
+	    		<if test="moduleName != null ">
+	    			WHERE module_name like CONCAT('%',#{moduleName},'%') 
+	    		</if>
+    		</trim>
+    	</if>
+    	order by show_order asc
+    	<if test="start>= 0">
+    		limit #{start, jdbcType=INTEGER},#{end, jdbcType=INTEGER}
+    	</if>
+	</select>
+	
+	<select id="findModuleType" resultType="java.util.HashMap">
+		SELECT *
+		FROM
+		code_table
+	</select>
+	
+	<select id="judgeRepition" resultType="java.util.HashMap">
+		SELECT * FROM module
+		<if test="moduleName != null and moduleName != '' ">
+			WHERE module_name = #{moduleName,jdbcType=VARCHAR}
+		</if>
+	</select>
+	
+	<select id="findModules" resultType="java.util.HashMap">
+		SELECT id,module_code AS moduleCode,module_name AS moduleName,url,owner_type AS ownerType,level0,show_order AS showOrder FROM module
+    	
+    	<if test="moduleName != null and moduleName !=''">
+    		<trim suffixOverrides="and">
+	    		<if test="moduleName != null ">
+	    			where module_name like CONCAT('%',#{moduleName},'%') 
+	    		</if>
+    		</trim>
+    	</if>
+    	order by show_order asc
+    	<if test="start>= 0">
+    		limit #{start, jdbcType=INTEGER},#{end, jdbcType=INTEGER}
+    	</if>
+	</select>
+	
+	<select id="selectLevel0" resultType="java.lang.String">
+		select level0 from module 
+		<if test="parentCode == null">
+		where parent_code is null
+		</if>
+		<if test="parentCode!=null">
+		where parent_code = #{parentCode,jdbcType=VARCHAR}
+		</if>	
+	</select>
+
+	<select id="getModuleCodes" resultType="java.util.HashMap">
+		SELECT
+			module_code moduleCode
+		FROM
+			(
+				SELECT
+					pa.module_code
+				FROM
+					role,
+					permission_assign pa,
+					user_assign ua
+				WHERE
+				<if test="userId != null">
+					ua.user_id = #{userId,jdbcType=VARCHAR}
+				</if>
+				AND role.id = ua.role_id
+				AND pa.owner_type_code = role.id
+			) mc
+		WHERE
+			mc.module_code IN (
+	           SELECT 
+	             system_value 
+	           FROM system_parameter
+	           where 
+	            name = #{systemName, jdbcType=VARCHAR}
+			)
+	</select>
+	
+	<select id="getPageNavigation" resultType="java.util.HashMap">  
+		 SELECT DISTINCT
+			module.id,
+			module.module_code moduleCode,
+			module.owner_type ownerType,
+			module.has_child hasChild,
+			module.level0,
+			module.module_name moduleName,
+			module.is_menu isMenu,
+			module.is_menu_page ismenuPage,
+			module.parent_code parentCode,
+			module.show_order showOrder,
+			module.url,
+			module.child_show_type childShowType
+		FROM
+			module
+		WHERE
+			1 = 1
+		AND parent_code = #{parentCode,jdbcType=VARCHAR}
+		AND module_code IN (
+			SELECT
+				pa.module_code
+			FROM
+				permission_assign pa,
+				user_assign ua
+			WHERE
+				pa.owner_type_code in
+				<foreach item = "roleArray" collection = "roleArray" open = "(" separator = "," close = ")" > 
+					#{roleArray}
+				</foreach >
+			AND ua.user_id = #{userId,jdbcType=VARCHAR}
+		)
+		ORDER BY
+		show_order ASC
+    </select> 
+    
+    <select id="getModuleForRole" resultType="java.util.HashMap">
+    	SELECT
+			module.module_code,
+			parent_code,
+			module.module_name
+		FROM
+			module
+		WHERE
+			module_code IN (
+				SELECT
+					module_code
+				FROM
+					permission_assign
+				WHERE
+					owner_type_code =#{orgCode,jdbcType=VARCHAR}
+		)
+    </select>
+</mapper>

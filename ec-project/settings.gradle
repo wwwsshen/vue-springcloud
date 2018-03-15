@@ -1,0 +1,13 @@
+rootProject.name = 'root'
+include 'ec-mh:mh-dao'
+findProject(':ec-mh:mh-dao')?.name = 'mh-dao'
+include 'ec-mh:mh-service'
+findProject(':ec-mh:mh-service')?.name = 'mh-service'
+include 'ec-mh:mh-service-impl'
+findProject(':ec-mh:mh-service-impl')?.name = 'mh-service-impl'
+include 'ec-mh:mh-entity'
+findProject(':ec-mh:mh-entity')?.name = 'mh-entity'
+include 'ec-mh:mh-api'
+findProject(':ec-mh:mh-api')?.name = 'mh-api'
+include 'ec-utils'
+

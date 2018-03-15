@@ -1,0 +1,1 @@
+npm install yarn --global & yarn --cwd ./mh-web install & yarn --cwd ./mh-web start

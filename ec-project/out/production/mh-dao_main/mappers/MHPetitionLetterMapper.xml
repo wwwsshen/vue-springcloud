@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.ec.mh.dao.mapper.MHPetitionLetterMapper">
+  <resultMap id="BaseResultMap" type="org.ec.mh.entity.MHPetitionLetter">
+    <constructor>
+      <idArg column="id" javaType="java.lang.Integer" jdbcType="INTEGER" />
+      <arg column="title" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <arg column="to_organization_id" javaType="java.lang.Integer" jdbcType="INTEGER" />
+      <arg column="status" javaType="java.lang.Boolean" jdbcType="BIT" />
+      <arg column="addresser_name" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <arg column="addresser_mobile" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <arg column="addresser_email" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <arg column="addresser_address" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <arg column="query_number" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <arg column="handle_organization_id" javaType="java.lang.Integer" jdbcType="INTEGER" />
+      <arg column="finished_at" javaType="java.util.Date" jdbcType="TIMESTAMP" />
+      <arg column="is_open" javaType="java.lang.Boolean" jdbcType="BIT" />
+      <arg column="created_at" javaType="java.util.Date" jdbcType="TIMESTAMP" />
+      <arg column="updated_at" javaType="java.util.Date" jdbcType="TIMESTAMP" />
+      <arg column="content" javaType="java.lang.String" jdbcType="LONGVARCHAR" />
+      <arg column="handle_content" javaType="java.lang.String" jdbcType="LONGVARCHAR" />
+    </constructor>
+  </resultMap>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from mh_petition_letter
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="org.ec.mh.entity.MHPetitionLetter">
+    <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into mh_petition_letter (title, to_organization_id, status, 
+      addresser_name, addresser_mobile, addresser_email, 
+      addresser_address, query_number, handle_organization_id, 
+      finished_at, is_open, created_at, 
+      updated_at, content, handle_content
+      )
+    values (#{title,jdbcType=VARCHAR}, #{toOrganizationId,jdbcType=INTEGER}, #{status,jdbcType=BIT}, 
+      #{addresserName,jdbcType=VARCHAR}, #{addresserMobile,jdbcType=VARCHAR}, #{addresserEmail,jdbcType=VARCHAR}, 
+      #{addresserAddress,jdbcType=VARCHAR}, #{queryNumber,jdbcType=VARCHAR}, #{handleOrganizationId,jdbcType=INTEGER}, 
+      #{finishedAt,jdbcType=TIMESTAMP}, #{isOpen,jdbcType=BIT}, #{createdAt,jdbcType=TIMESTAMP}, 
+      #{updatedAt,jdbcType=TIMESTAMP}, #{content,jdbcType=LONGVARCHAR}, #{handleContent,jdbcType=LONGVARCHAR}
+      )
+  </insert>
+  <update id="updateByPrimaryKey" parameterType="org.ec.mh.entity.MHPetitionLetter">
+    update mh_petition_letter
+    set title = #{title,jdbcType=VARCHAR},
+      to_organization_id = #{toOrganizationId,jdbcType=INTEGER},
+      status = #{status,jdbcType=BIT},
+      addresser_name = #{addresserName,jdbcType=VARCHAR},
+      addresser_mobile = #{addresserMobile,jdbcType=VARCHAR},
+      addresser_email = #{addresserEmail,jdbcType=VARCHAR},
+      addresser_address = #{addresserAddress,jdbcType=VARCHAR},
+      query_number = #{queryNumber,jdbcType=VARCHAR},
+      handle_organization_id = #{handleOrganizationId,jdbcType=INTEGER},
+      finished_at = #{finishedAt,jdbcType=TIMESTAMP},
+      is_open = #{isOpen,jdbcType=BIT},
+      created_at = #{createdAt,jdbcType=TIMESTAMP},
+      updated_at = #{updatedAt,jdbcType=TIMESTAMP},
+      content = #{content,jdbcType=LONGVARCHAR},
+      handle_content = #{handleContent,jdbcType=LONGVARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select id, title, to_organization_id, status, addresser_name, addresser_mobile, addresser_email, 
+    addresser_address, query_number, handle_organization_id, finished_at, is_open, created_at, 
+    updated_at, content, handle_content
+    from mh_petition_letter
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <select id="selectAll" resultMap="BaseResultMap">
+    select id, title, to_organization_id, status, addresser_name, addresser_mobile, addresser_email, 
+    addresser_address, query_number, handle_organization_id, finished_at, is_open, created_at, 
+    updated_at, content, handle_content
+    from mh_petition_letter
+  </select>
+</mapper>

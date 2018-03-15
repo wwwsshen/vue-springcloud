@@ -1,0 +1,58 @@
+spring:
+  datasource:
+      url: jdbc:mysql://${MYSQL_URL:localhost:3306/${MYSQL_DATABASE:ec-mh_dev}}?characterEncoding=utf-8
+      # 使用druid数据源
+      username: ${MYSQL_USER:root}
+      password: ${MYSQL_PASS:123456}
+      driver-class-name: com.mysql.jdbc.Driver
+      type: com.alibaba.druid.pool.DruidDataSource
+  devtools:
+    restart:
+      enabled: true
+    livereload:
+      enabled: true
+#  cloud:
+#    consul:
+#      enabled: false
+#      host: ${CONSUL_HOST}
+#      port: ${CONSUL_PORT}
+#      discovery:
+#        enabled: false
+#        serviceName: ec-mh
+#        hostname: ${HOST}
+#        port: ${OUT_PORT:${server.port}}
+#        healthCheckInterval: 10s
+#        instanceId: ${spring.application.name}
+
+  application:
+    name: ec-mh
+
+# 在consul配置中已有
+#  zipkin:
+#    base-url: ${ZIPKIN_URL}
+#  sleuth:
+#    sampler:
+#      percentage: 1
+
+
+server:
+  port: ${PORT:8080}
+
+#zuul:
+#  routes:
+#    ec-mh-web:
+#      serviceId: ec-mh-web
+#      path: /standard/**
+
+#  ignoredPatterns: /api/**
+#  web:
+#    path: /**
+#    url: http://localhost:3000
+
+
+#ribbon:
+#  ReadTimeout: 20000
+#  ConnectTimeout: 20000
+#  ServerListRefreshInterval: 1000
+#  eureka:
+#     enabled: false

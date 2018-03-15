@@ -1,0 +1,38 @@
+# 同时生成多个实体，多套curd
+api:
+  prefix: ""
+
+entities:
+  Mh0202:
+    name: "文章栏目"
+    request:
+      getAll: "GET MH0202/A01"
+      create: "POST MH0202/A02"
+      get: "GET MH0202/A03"
+      update: "POST MH0202/A04"
+      delete: "POST MH0202/A05"
+    fields:
+      name:
+        type: input
+        label: "栏目名"
+        placeholder: "栏目名"
+        sort: false    # 表格排序
+        validates:
+          - required: true
+            message: "字数必须是5"
+          - len: 3
+            message: "abcc"
+      showAtHome:
+        type: select
+        label: "显示在首页"
+        placeholder: "是否显示在首页"
+        default: 1
+        values:
+          - value: 1
+            label: "是"
+          - value: 0
+            label: "否"
+      sort:
+        type: number
+        default: 0
+        label: "排序"

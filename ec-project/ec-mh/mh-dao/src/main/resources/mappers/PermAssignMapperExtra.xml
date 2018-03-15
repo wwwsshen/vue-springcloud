@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="org.ec.mh.dao.mapper.PermAssignMapperExtra" >
+	<insert id="batchInsertPerm"  parameterType="java.util.List">  
+    	INSERT INTO permission_assign (id,owner_type,owner_type_code,module_code,is_no)
+    	<foreach collection="pas" item="pa" index="index" separator=" UNION " >  
+        	SELECT #{pa.id, jdbcType=VARCHAR},#{pa.ownerType, jdbcType=VARCHAR}, #{pa.ownerTypeCode, jdbcType=VARCHAR},
+        	#{pa.moduleCode, jdbcType=VARCHAR}, #{pa.isNo}
+        	FROM DUAL
+        	WHERE  EXISTS (SELECT 1 FROM module WHERE module.module_code=#{pa.moduleCode} limit 1)
+    	</foreach>  
+    </insert> 
+    
+   	<insert id="batchInsertPermForApp"  parameterType="java.util.List">  
+    	INSERT INTO app_module_assignment (id,role_id,app_module_id)
+    	<foreach collection="amas" item="ama" index="index" separator=" UNION " >  
+        	SELECT #{ama.id, jdbcType=VARCHAR},#{ama.roleId, jdbcType=VARCHAR}, 
+        		#{ama.appModuleId, jdbcType=VARCHAR}
+        	FROM DUAL
+        	WHERE  EXISTS (SELECT 1 FROM app_module WHERE id=#{ama.appModuleId} limit 1)
+    	</foreach>  
+    </insert> 
+    
+    <delete id="delePermByOwner">
+    	DELETE FROM permission_assign 
+    		WHERE owner_type = #{ownerType, jdbcType=VARCHAR} AND owner_type_code = #{ownerTypeCode, jdbcType=VARCHAR}
+    </delete>
+    
+    <delete id="delePermByRole">
+    	DELETE FROM app_module_assignment 
+    		WHERE role_id = #{roleId, jdbcType=VARCHAR}
+    </delete>
+    
+    <delete id="batchDelePermByOwner" >
+    	DELETE FROM permission_assign 
+    		WHERE owner_type = #{ownerType, jdbcType=VARCHAR} AND owner_type_code IN
+    		<foreach collection="ownerTypeCodes" item = "ownerTypeCode" open="(" separator="," close=")"> #{ownerTypeCode, jdbcType=VARCHAR}
+			</foreach>  
+    	
+    </delete>
+    
+    <select id="findModuleIdByOwner" resultType="java.util.HashMap">
+		SELECT
+		  m.id,
+		  pa.module_code moduleCode,
+		  m.module_name moduleName
+		FROM
+			permission_assign pa
+		    LEFT JOIN module m ON m.module_code = pa.module_code
+		WHERE
+			pa.owner_type = #{ownerType, jdbcType=VARCHAR}
+		AND pa.owner_type_code = #{ownerTypeCode, jdbcType=VARCHAR} 
+		UNION 
+		SELECT
+		  am.id,
+		  am.module_code moduleCode,
+		  am.app_module_name moduleName
+		FROM
+			app_module_assignment ama
+		    LEFT JOIN app_module am ON am.id = ama.app_module_id
+		WHERE
+		  ama.role_id = #{ownerTypeCode, jdbcType=VARCHAR} 
+    </select>
+    
+    <select id="isTakeUp" resultType="java.lang.String">
+    SELECT DISTINCT * FROM(
+    	SELECT
+			role
+		FROM
+			employee
+		WHERE
+		  role IN
+		  <foreach collection="roleIds" item = "role" open="(" separator="," close=")"> 
+		  		#{role, jdbcType=VARCHAR}
+		  </foreach> 
+		UNION ALL
+			SELECT
+				role_id
+			FROM
+				user_assign
+			WHERE
+			  role_id IN
+		  	  <foreach collection="roleIds" item = "role" open="(" separator="," close=")"> 
+		  		 	#{role, jdbcType=VARCHAR}
+		      </foreach> 
+		     ) as tablemain
+    </select>
+    
+    <select id="authorityList" resultType="java.util.HashMap">
+    SELECT
+	*
+	FROM
+		module
+	WHERE
+		module_code IN (
+			SELECT
+				module_code
+			FROM
+				permission_assign
+			WHERE
+				owner_type_code =#{typeCode, jdbcType=VARCHAR}
+		)
+	ORDER BY
+		module_code,
+		show_order
+    </select>
+    
+   	<select id="getRoles" resultType="java.util.HashMap">
+		SELECT
+			CASE 
+			WHEN role_ids IS NULL THEN role_id
+			WHEN role_id IS NULL THEN role_ids
+			ELSE CONCAT(role_id, ',', role_ids) END roleId
+		FROM
+			user_assign userAssign
+			LEFT JOIN organization ON org_code = userAssign.dept_org
+		WHERE
+			user_id = #{userId,jdbcType=VARCHAR}
+	</select>
+</mapper>

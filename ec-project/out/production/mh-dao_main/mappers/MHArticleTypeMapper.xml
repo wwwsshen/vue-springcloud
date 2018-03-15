@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.ec.mh.dao.mapper.MHArticleTypeMapper">
+    <insert id="insert" parameterType="org.ec.mh.entity.MHArticleType">
+        <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+        INSERT INTO mh_article_type (
+            parent_id,
+            `name`,
+            show_at_home,
+            sort,
+            created_at
+        )
+        VALUES(#{parentId}, #{name}, #{showAtHome}, #{sort}, CURRENT_TIMESTAMP)
+    </insert>
+
+    <update id="updateByPrimaryKey" parameterType="org.ec.mh.entity.MHArticleType">
+        UPDATE mh_article_type
+        SET parent_id = #{parentId},
+            `name` = #{name},
+            show_at_home = #{showAtHome},
+            sort = #{sort}
+        WHERE
+            id = #{id} AND updated_at = #{updatedAt}
+    </update>
+
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+        delete from mh_article_type where id = #{id}
+    </delete>
+
+    <resultMap id="ResultMapCommon" type="org.ec.mh.entity.MHArticleType">
+        <id column="id" property="id"/>
+        <result property="parentId" column="parent_id"/>
+        <result property="name" column="name"/>
+        <result property="showAtHome" column="show_at_home"/>
+        <result property="sort" column="sort"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+    <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="ResultMapCommon">
+        SELECT
+            id,
+            parent_id,
+            `name`,
+            show_at_home,
+            sort,
+            deleted_at,
+            created_at,
+            updated_at
+        FROM
+            mh_article_type
+        WHERE
+            id = #{id}
+    </select>
+
+    <resultMap id="ResultMapWithChildrenAndArticleCount" type="org.ec.mh.entity.MHArticleType">
+        <id column="id" property="id"/>
+        <result property="parentId" column="parent_id"/>
+        <result property="name" column="name"/>
+        <result property="showAtHome" column="show_at_home"/>
+        <result property="sort" column="sort"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+        <result property="articleCount" column="article_count"/>
+        <collection property="children" column="id" select="findChildren"/>
+    </resultMap>
+
+    <sql id="common_columns">
+        t.id,
+        t.parent_id,
+        t.`name`,
+        t.show_at_home,
+        t.sort,
+        t.deleted_at,
+        t.created_at,
+        t.updated_at,
+    </sql>
+
+    <select id="selectAll" resultMap="ResultMapWithChildrenAndArticleCount">
+        SELECT
+            <include refid="common_columns"/>
+            count(a.id) AS article_count
+        FROM mh_article_type t
+        LEFT JOIN mh_article a ON a.article_type_id = t.id
+        WHERE t.parent_id IS NULL
+        GROUP BY t.id
+        ORDER BY t.sort, t.id
+    </select>
+
+    <select id="findChildren" parameterType="java.lang.Integer" resultMap="ResultMapWithChildrenAndArticleCount">
+        SELECT
+            <include refid="common_columns"/>
+            count(a.id) AS article_count
+        FROM mh_article_type t
+        LEFT JOIN mh_article a ON a.article_type_id = t.id
+        WHERE t.parent_id = #{id}
+        GROUP BY t.id
+        ORDER BY t.sort, t.id
+    </select>
+</mapper>

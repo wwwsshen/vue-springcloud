@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="org.ec.mh.dao.mapper.RoleAndRolePermMapper" >
+    <delete id="bactchDeleteRoles" >
+    	DELETE FROM role WHERE id IN
+    	<foreach collection="roleIds" item = "roleId" open="(" separator="," close=")">#{roleId,jdbcType=VARCHAR}  
+  
+    </foreach>  
+    </delete>
+    
+    <select id="findRoleById" resultType="java.util.HashMap">
+    	SELECT id,name roleName,remark roleRemark FROM role WHERE id=#{id,jdbcType=VARCHAR}
+    </select>
+    
+    <select id="findRolesWithLimit" resultType="java.util.HashMap">
+    	SELECT id ,name,remark roleRemark, type FROM role
+    	<if test="roleName != null  or roleType >= 0">
+    		WHERE 
+    		<trim suffixOverrides="and">
+	    		<if test="roleName != null ">
+	    			<![CDATA[ name LIKE concat('%',#{roleName,jdbcType=VARCHAR},'%')]]> and
+	    		</if>
+	    		<if test="roleType >= 0">
+	    			type=#{roleType,jdbcType=TINYINT} and
+	    		</if>
+	    		
+	    		<if test="orgCode != null and roleType!=0">
+	    			org_id=#{orgCode,jdbcType=TINYINT} and
+	    		</if>
+    		</trim>
+    		
+    	</if>
+    	<if test="start>= 0">
+    		limit #{start, jdbcType=INTEGER},#{end, jdbcType=INTEGER}
+    	</if>
+    </select>
+</mapper>
